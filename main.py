@@ -1,27 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import List
+from routes import *
 
-#comando para entrar no venv "smartlog-venv\Scripts\activate.bat"
-
-app = FastAPI()
-
-@app.get('/')
-def index():
-    return {'data': {'name': 'Benicio'}}
-
-@app.get('/about')
-def about():
-    return {'data': {'name': 'about page'}}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+smartlog = FastAPI()
