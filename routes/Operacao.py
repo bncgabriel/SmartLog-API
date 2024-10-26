@@ -1,44 +1,47 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List
-from routes import permissao
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+from models.operacao import Operacao
+from schemas.operacao import OperacaoCreate, OperacaoRead, OperacaoUpdate
+from database import get_db
 
-smartlog = FastAPI()
+router = APIRouter()
 
-class Operacao(BaseModel):
-    navio_operacao: str
-    pais_orig: str
-    tipo_carga: str
-    pesagem_total: float
-    periodo: str
+@router.post("/", response_model=OperacaoRead)
+def criar_operacao(operacao: OperacaoCreate, db: Session = Depends(get_db)):
+    db_operacao = Operacao(**operacao.dict())
+    db.add(db_operacao)
+    db.commit()
+    db.refresh(db_operacao)
+    return db_operacao
 
-operacao_db = []
+@router.get("/{operacao_id}", response_model=OperacaoRead)
+def buscar_operacao(operacao_id: int, db: Session = Depends(get_db)):
+    db_operacao = db.query(Operacao).filter(Operacao.id_operacao == operacao_id).first()
+    if db_operacao is None:
+        raise HTTPException(status_code=404, detail="Operação não encontrada")
+    return db_operacao
 
-@smartlog.post("/operacoes", response_model= Operacao)
-async def cadastrar_operacao(operacao: Operacao):
-    permissoes_db.append(operacao)
-    return operacao
+@router.get("/", response_model=list[OperacaoRead])  
+def listar_operacoes (db: Session = Depends(get_db)):
+    db_operacao = db.query(Operacao).all() 
+    return db_operacao
 
-@smartlog.get("/operacoes/", response_model=List[Operacao])
-async def read_empresas():
-    return operacao_db
+@router.put("/{operacao_id}", response_model=OperacaoRead)
+def atualizar_operacao(operacao_id: int, operacao: OperacaoUpdate, db: Session = Depends(get_db)):
+    db_operacao = db.query(Operacao).filter(Operacao.id_operacao == operacao_id).first()
+    if db_operacao is None:
+        raise HTTPException(status_code=404, detail="Operação não encontrada")
+    for var, value in vars(operacao).items():
+        setattr(db_operacao, var, value) if value else None
+    db.commit()
+    db.refresh(db_operacao)
+    return db_operacao
 
-@smartlog.get("/operacoes/{id_operacao}", response_model=Operacao)
-async def read_empresa(id_operacao: int):
-    if id_operacao < len(operacao_db):
-        return operacao_db[id_operacao]
-    raise HTTPException(status_code=404, detail="Operacao não encontrada")
-
-@smartlog.put("/operacoes/{id_operacao}", response_model=Operacao)
-async def update_empresa(id_operacao: int, updated_operacao: Operacao):
-    if id_operacao < len(operacao_db):
-        empresas_db[id_operacao] = updated_operacao
-        return updated_operacao
-    raise HTTPException(status_code=404, detail="Operacao não encontrada")
-
-@smartlog.delete("/operacoes/{id_operacao}", response_model=Operacao)
-async def delete_operacao(id_operacao: int):
-    if id_operacao < len(operacao_db):
-        delete_operacao = permissoes_db.pop(id_operacao)
-        return delete_operacao
-    raise HTTPException(status_code=404, detail="Operação não encontrada")
+@router.delete("/{operacao_id}", response_model=OperacaoRead)
+def excluir_operacao(operacao_id: int, db: Session = Depends(get_db)):
+    db_operacao = db.query(Operacao).filter(Operacao.id_operacao == operacao_id).first()
+    if db_operacao is None:
+        raise HTTPException(status_code=404, detail="Operação não encontrada")
+    db.delete(db_operacao)
+    db.commit()
+    return db_operacao

@@ -1,40 +1,50 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
+from models.permissao import Permissao
+from schemas.permissao import PermissaoCreate, PermissaoRead, PermissaoUpdate
+from database import get_db
 
-smartlog = FastAPI()
+router = APIRouter()
 
-class Permissao(BaseModel):
-    permissao: str
-    descricao_permissao: str
+@router.post("/", response_model=PermissaoRead, status_code=status.HTTP_201_CREATED)
+def criar_permissao(permissao: PermissaoCreate, db: Session = Depends(get_db)):
+    """Cria uma nova permissão."""
+    db_permissao = Permissao(**permissao.dict())
+    db.add(db_permissao)
+    db.commit()
+    db.refresh(db_permissao)
+    return db_permissao
 
-permissoes_db = []
+@router.get("/", response_model=list[PermissaoRead])  
+def listar_permissao (db: Session = Depends(get_db)):
+    db_permissao = db.query(Permissao).all() 
+    return db_permissao
 
-@smartlog.post("/permissoes/", response_model=Permissao)
-async def criar_permissoes(permissao: Permissao):
-    permissoes_db.append(permissao)
-    return permissao
+@router.get("/{permissao_id}", response_model=PermissaoRead)
+def bucar_permissao(permissao_id: int, db: Session = Depends(get_db)) -> PermissaoRead:
+    """Obtém uma permissão por ID."""
+    db_permissao = db.get(Permissao, permissao_id)
+    if not db_permissao:
+        raise HTTPException(status_code=404, detail="Permissão não encontrada")
+    return db_permissao
 
-@smartlog.get("/permissoes/", response_model=List[Permissao])
-async def read_permissoes():
-    return permissoes_db
+@router.put("/{permissao_id}", response_model=PermissaoRead)
+def atualizar_permissao(permissao_id: int, permissao: PermissaoUpdate, db: Session = Depends(get_db)):
+    """Atualiza uma permissão existente."""
+    db_permissao = db.query(Permissao).filter(Permissao.id_permissao == permissao_id).first()
+    if not db_permissao:
+        raise HTTPException(status_code=404, detail="Permissão não encontrada")
+    db_permissao.update(permissao.dict(exclude_unset=True))
+    db.commit()
+    db.refresh(db_permissao)
+    return db_permissao
 
-@smartlog.get("/permissoes/{permissao_id}", response_model=Permissao)
-async def read_permissao(permissao_id: int):
-    if permissao_id < len(permissoes_db):
-        return permissoes_db[permissao_id]
-    raise HTTPException(status_code=404, detail="Permissao não encontrada")
+@router.delete("/{permissao_id}", status_code=status.HTTP_204_NO_CONTENT)
+def excluir_permissao(permissao_id: int, db: Session = Depends(get_db)):
+    """Deleta uma permissão."""
+    db_permissao = db.query(Permissao).filter(Permissao.id_permissao == permissao_id).first()
+    if not db_permissao:
+        raise HTTPException(status_code=404, detail="Permissão não encontrada")
 
-@smartlog.put("/permissoes/{permissao_id}", response_model=Permissao)
-async def update_permissao(permissao_id: int, updated_permissao: Permissao):
-    if permissao_id < len(permissoes_db):
-        permissoes_db[permissao_id] = updated_permissao
-        return updated_permissao
-    raise HTTPException(status_code=404, detail="Permissao não encontrada")
-
-@smartlog.delete("/permissoes/{permissao_id}", response_model=Permissao)
-async def delete_permissao(permissao_id: int):
-    if permissao_id < len(permissoes_db):
-        deleted_permissao = permissoes_db.pop(permissao_id)
-        return deleted_permissao
-    raise HTTPException(status_code=404, detail="Permissao não encontrada")
+    db.delete(db_permissao)
+    db.commit()
