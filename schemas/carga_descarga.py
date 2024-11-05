@@ -1,24 +1,30 @@
-# schemas/carga_descarga.py
+from datetime import datetime
 from pydantic import BaseModel
 
 class CargaDescargaBase(BaseModel):
-    data_hora_carga: str
-    pesagem: float
-    hora_saida: str
     codigo_carga: str
     tag: str
     registro: str
 
 class CargaDescargaCreate(CargaDescargaBase):
-    id_veiculo_empresa: int
+    data_hora_carga: datetime
+    pesagem: float
+    hora_saida: datetime
+    placa_veiculoc_empresa: str
     id_motorista_empresa: int
     operacao: int
 
 class CargaDescargaRead(CargaDescargaBase):
+    pesagem: float
+    hora_saida: datetime
+    hora_final: datetime
+    placa_veiculoc_empresa: str
+    id_motorista_empresa: int
+    operacao: int
     id_carga_descarga: int
 
     class Config:
         orm_mode = True
 
 class CargaDescargaUpdate(CargaDescargaBase):
-    pass
+    hora_final: datetime

@@ -9,7 +9,6 @@ class OperacaoBase(BaseModel):
 
 class OperacaoCreate(OperacaoBase):
     inicio: datetime
-    fim: datetime
 
 
     def validate_data(self):
@@ -23,4 +22,4 @@ class OperacaoRead(OperacaoBase):
         orm_mode = True
 
 class OperacaoUpdate(OperacaoBase):
-    pass 
+    fim: datetime

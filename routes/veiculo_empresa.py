@@ -14,16 +14,16 @@ def criar_veiculo(veiculo: VeiculoEmpresaCreate, db: Session = Depends(get_db)):
     db.refresh(db_veiculo)
     return db_veiculo
 
-@router.get("/{veiculo_id}", response_model=VeiculoEmpresaRead)
-def buscar_veiculo(veiculo_id: int, db: Session = Depends(get_db)):
-    db_veiculo = db.query(VeiculoEmpresa).filter(VeiculoEmpresa.id_veiculo == veiculo_id).first()
+@router.get("/{placa_cavalo}", response_model=VeiculoEmpresaRead)
+def buscar_veiculo(placa_cavalo: str, db: Session = Depends(get_db)):
+    db_veiculo = db.query(VeiculoEmpresa).filter(VeiculoEmpresa.placa_cavalo == placa_cavalo).first()
     if db_veiculo is None:
         raise HTTPException(status_code=404, detail="Veículo não encontrado")
     return db_veiculo
 
-@router.put("/{veiculo_id}", response_model=VeiculoEmpresaRead)
-def atualizar_veiculo(veiculo_id: int, veiculo: VeiculoEmpresaUpdate, db: Session = Depends(get_db)):
-    db_veiculo = db.query(VeiculoEmpresa).filter(VeiculoEmpresa.id_veiculo == veiculo_id).first()
+@router.put("/{placa_cavalo}", response_model=VeiculoEmpresaRead)
+def atualizar_veiculo(placa_cavalo: int, veiculo: VeiculoEmpresaUpdate, db: Session = Depends(get_db)):
+    db_veiculo = db.query(VeiculoEmpresa).filter(VeiculoEmpresa.id_veiculo == placa_cavalo).first()
     if db_veiculo is None:
         raise HTTPException(status_code=404, detail="Veículo não encontrado")
     for var, value in vars(veiculo).items():
@@ -32,9 +32,9 @@ def atualizar_veiculo(veiculo_id: int, veiculo: VeiculoEmpresaUpdate, db: Sessio
     db.refresh(db_veiculo)
     return db_veiculo
 
-@router.delete("/{veiculo_id}", response_model=VeiculoEmpresaRead)
-def excluir_veiculo(veiculo_id: int, db: Session = Depends(get_db)):
-    db_veiculo = db.query(VeiculoEmpresa).filter(VeiculoEmpresa.id_veiculo == veiculo_id).first()
+@router.delete("/{placa_cavalo}", response_model=VeiculoEmpresaRead)
+def excluir_veiculo(placa_cavalo: int, db: Session = Depends(get_db)):
+    db_veiculo = db.query(VeiculoEmpresa).filter(VeiculoEmpresa.id_veiculo == placa_cavalo).first()
     if db_veiculo is None:
         raise HTTPException(status_code=404, detail="Veículo não encontrado")
     db.delete(db_veiculo)
