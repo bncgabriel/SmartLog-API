@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: meu_postgres
+    ports:
+      - "1001:5432"
+    environment:
+      - POSTGRES_USER=bncgabriel
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=smartlog
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
