@@ -1,48 +1,45 @@
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from models.empresa import Empresa
+from fastapi import APIRouter, Depends
+
+from dependencies import get_empresa_service
 from schemas.empresa import EmpresaCreate, EmpresaRead, EmpresaUpdate
-from database import get_db
+from services.empresa_service import EmpresaService
 
 router = APIRouter()
 
+
 @router.post("/", response_model=EmpresaRead)
-def cadastrar_empresa(empresa: EmpresaCreate, db: Session = Depends(get_db)):
-    db_empresa = Empresa(**empresa.dict())
-    db.add(db_empresa)
-    db.commit()
-    db.refresh(db_empresa)
-    return db_empresa
+def cadastrar_empresa(
+    empresa: EmpresaCreate,
+    service: EmpresaService = Depends(get_empresa_service),
+):
+    return service.create(empresa.dict())
+
 
 @router.get("/{empresa_id}", response_model=EmpresaRead)
-def buscar_empresa(empresa_id: int, db: Session = Depends(get_db)):
-    db_empresa = db.query(Empresa).filter(Empresa.id_empresa == empresa_id).first()
-    if db_empresa is None:
-        raise HTTPException(status_code=404, detail="Empresa not found")
-    return db_empresa
+def buscar_empresa(
+    empresa_id: int,
+    service: EmpresaService = Depends(get_empresa_service),
+):
+    return service.get_by_id(empresa_id)
 
-@router.get("/", response_model=list[EmpresaRead])  
-def listar_empresas (db: Session = Depends(get_db)):
-    db_empresa = db.query(Empresa).all() 
-    return db_empresa
+
+@router.get("/", response_model=list[EmpresaRead])
+def listar_empresas(service: EmpresaService = Depends(get_empresa_service)):
+    return service.list_all()
 
 
 @router.put("/{empresa_id}", response_model=EmpresaRead)
-def atualizar_empresa (empresa_id: int, empresa: EmpresaUpdate, db: Session = Depends(get_db)):
-    db_empresa = db.query(Empresa).filter(Empresa.id_empresa == empresa_id).first()
-    if db_empresa is None:
-        raise HTTPException(status_code=404, detail="Empresa not found")
-    for campo, valor in empresa.dict(exclude_unset=True).items():
-        setattr(db_empresa, campo, valor)
-    db.commit()
-    db.refresh(db_empresa)
-    return db_empresa
+def atualizar_empresa(
+    empresa_id: int,
+    empresa: EmpresaUpdate,
+    service: EmpresaService = Depends(get_empresa_service),
+):
+    return service.update(empresa_id, empresa.dict(exclude_unset=True))
+
 
 @router.delete("/{empresa_id}", response_model=EmpresaRead)
-def excluir_empresa(empresa_id: int, db: Session = Depends(get_db)):
-    db_empresa = db.query(Empresa).filter(Empresa.id_empresa == empresa_id).first()
-    if db_empresa is None:
-        raise HTTPException(status_code=404, detail="Empresa not found")
-    db.delete(db_empresa)
-    db.commit()
-    return db_empresa
+def excluir_empresa(
+    empresa_id: int,
+    service: EmpresaService = Depends(get_empresa_service),
+):
+    return service.delete(empresa_id)

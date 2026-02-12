@@ -1,4 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+from core.errors import BusinessRuleError, DomainError, NotFoundError
 from routes.empresa import router as empresa_router
 from routes.permissao import router as permissao_router
 from routes.funcionario import router as funcionario_router
@@ -11,6 +14,21 @@ from database import engine, Base
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+
+@app.exception_handler(NotFoundError)
+async def not_found_exception_handler(_: Request, exc: NotFoundError):
+    return JSONResponse(status_code=404, content={"detail": exc.detail})
+
+
+@app.exception_handler(BusinessRuleError)
+async def business_rule_exception_handler(_: Request, exc: BusinessRuleError):
+    return JSONResponse(status_code=400, content={"detail": exc.detail})
+
+
+@app.exception_handler(DomainError)
+async def domain_exception_handler(_: Request, exc: DomainError):
+    return JSONResponse(status_code=400, content={"detail": str(exc)})
 
 app.include_router(empresa_router, prefix="/empresas", tags=["empresas"])
 app.include_router(permissao_router, prefix="/permissoes", tags=["permissoes"])

@@ -3,11 +3,11 @@ services:
     image: postgres:latest
     container_name: meu_postgres
     ports:
-      - "1001:5432"
+      - "${DB_PORT:-1001}:5432"
     environment:
-      - POSTGRES_USER=bncgabriel
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=smartlog
+      - POSTGRES_USER=${DB_USER:-smartlog_user}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-smartlog_password}
+      - POSTGRES_DB=${DB_NAME:-smartlog}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped

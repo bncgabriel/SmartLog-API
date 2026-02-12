@@ -10,8 +10,3 @@ class Permissao(Base):
     descricao_permissao = Column(String(50), nullable=False)
 
     funcionarios = relationship("Funcionario", back_populates="permissao")
-
-    def update(self, data: dict) -> None:
-        for key, value in data.items():
-            if hasattr(self, key):
-                setattr(self, key, value)

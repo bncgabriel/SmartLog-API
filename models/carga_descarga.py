@@ -1,4 +1,4 @@
-from sqlalchemy import Column, DateTime, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import TIMESTAMP
 from database import Base
