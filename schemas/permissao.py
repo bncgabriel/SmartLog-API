@@ -5,8 +5,7 @@ class PermissaoBase(BaseModel):
     descricao_permissao: str
 
 class PermissaoCreate(PermissaoBase):
-    permissao: str
-    descricao_permissao: str
+    pass
 
 class PermissaoRead(PermissaoBase):
     id_permissao: int
@@ -14,5 +13,6 @@ class PermissaoRead(PermissaoBase):
     class Config:
         orm_mode = True
 
-class PermissaoUpdate(PermissaoBase):
-    pass
+class PermissaoUpdate(BaseModel):
+    permissao: str | None = None
+    descricao_permissao: str | None = None

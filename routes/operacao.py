@@ -31,8 +31,8 @@ def atualizar_operacao(operacao_id: int, operacao: OperacaoUpdate, db: Session =
     db_operacao = db.query(Operacao).filter(Operacao.id_operacao == operacao_id).first()
     if db_operacao is None:
         raise HTTPException(status_code=404, detail="Operação não encontrada")
-    for var, value in vars(operacao).items():
-        setattr(db_operacao, var, value) if value else None
+    for campo, valor in operacao.dict(exclude_unset=True).items():
+        setattr(db_operacao, campo, valor)
     db.commit()
     db.refresh(db_operacao)
     return db_operacao

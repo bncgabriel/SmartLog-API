@@ -35,8 +35,8 @@ def atualizar_funcionario(funcionario_id: int, funcionario: FuncionarioUpdate, d
     db_funcionario = db.query(Funcionario).filter(Funcionario.id_funcionario == funcionario_id).first()
     if db_funcionario is None:
         raise HTTPException(status_code=404, detail="Funcionário não encontrado")
-    for var, value in vars(funcionario).items():
-        setattr(db_funcionario, var, value) if value else None
+    for campo, valor in funcionario.dict(exclude_unset=True).items():
+        setattr(db_funcionario, campo, valor)
     db.commit()
     db.refresh(db_funcionario)
     return db_funcionario

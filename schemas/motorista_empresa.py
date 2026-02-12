@@ -16,5 +16,9 @@ class MotoristaEmpresaRead(MotoristaEmpresaBase):
     class Config:
         orm_mode = True
 
-class MotoristaEmpresaUpdate(MotoristaEmpresaBase):
-    pass
+class MotoristaEmpresaUpdate(BaseModel):
+    nome_completo: str | None = None
+    cpf: str | None = None
+    rg: str | None = None
+    telefone: str | None = None
+    id_empresa: int | None = None

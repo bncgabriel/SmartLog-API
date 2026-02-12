@@ -18,5 +18,11 @@ class FuncionarioRead(FuncionarioBase):
     class Config:
         orm_mode = True
 
-class FuncionarioUpdate(FuncionarioBase):
-    pass
+class FuncionarioUpdate(BaseModel):
+    nome_fun: str | None = None
+    cpf_fun: str | None = None
+    endereco_fun: str | None = None
+    telefone_fun: str | None = None
+    email_fun: str | None = None
+    id_empresa_vinculada: int | None = None
+    id_permissao: int | None = None

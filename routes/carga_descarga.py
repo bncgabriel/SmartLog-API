@@ -9,18 +9,18 @@ router = APIRouter()
 
 @router.post("/", response_model=CargaDescargaRead)
 def criar_carga_descarga(carga_descarga: CargaDescargaCreate, db: Session = Depends(get_db)): 
-    operacao = db.query(Operacao).filter(Operacao.id_operacao == carga_descarga.operacao).first() 
-    if not operacao: 
+    db_operacao = db.query(Operacao).filter(Operacao.id_operacao == carga_descarga.operacao).first() 
+    if not db_operacao: 
         raise HTTPException(status_code=404, detail="Operação não encontrada") 
-    if carga_descarga.pesagem > operacao.pesagem_total: raise HTTPException(status_code=400, detail="Peso da carga excede a pesagem total da operação") 
+    if carga_descarga.pesagem > db_operacao.pesagem_total:
+        raise HTTPException(status_code=400, detail="Peso da carga excede a pesagem total da operação") 
     
-    operacao.pesagem_total -= carga_descarga.pesagem 
+    db_operacao.pesagem_total -= carga_descarga.pesagem 
     db_carga_descarga = CargaDescarga(**carga_descarga.dict()) 
     db.add(db_carga_descarga) 
     db.commit() 
     db.refresh(db_carga_descarga) 
-    db.commit() 
-    db.refresh(operacao) 
+    db.refresh(db_operacao) 
     return db_carga_descarga
 
 @router.get("/{carga_descarga_id}", response_model=CargaDescargaRead)
@@ -35,8 +35,8 @@ def atualizar_carga_descarga(carga_descarga_id: int, carga_descarga: CargaDescar
     db_carga_descarga = db.query(CargaDescarga).filter(CargaDescarga.id_carga_descarga == carga_descarga_id).first()
     if db_carga_descarga is None:
         raise HTTPException(status_code=404, detail="Carga não encontrada")
-    for var, value in vars(carga_descarga).items():
-        setattr(db_carga_descarga, var, value) if value else None
+    for campo, valor in carga_descarga.dict(exclude_unset=True).items():
+        setattr(db_carga_descarga, campo, valor)
     db.commit()
     db.refresh(db_carga_descarga)
     return db_carga_descarga

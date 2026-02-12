@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 class OperacaoBase(BaseModel):
     navio_operacao: str
@@ -10,16 +10,18 @@ class OperacaoBase(BaseModel):
 class OperacaoCreate(OperacaoBase):
     inicio: datetime
 
-
-    def validate_data(self):
-        if self.fim <= self.inicio:
-            raise ValueError("A data de fim deve ser posterior à data de início.")
-
 class OperacaoRead(OperacaoBase):
     id_operacao: int
+    inicio: datetime
+    fim: datetime | None = None
 
     class Config:
         orm_mode = True
 
-class OperacaoUpdate(OperacaoBase):
-    fim: datetime
+class OperacaoUpdate(BaseModel):
+    navio_operacao: str | None = None
+    pais_orig: str | None = None
+    tipo_carga: str | None = None
+    pesagem_total: float | None = None
+    inicio: datetime | None = None
+    fim: datetime | None = None

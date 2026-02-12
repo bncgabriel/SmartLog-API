@@ -26,8 +26,8 @@ def atualizar_motorista(motorista_id: int, motorista: MotoristaEmpresaUpdate, db
     db_motorista = db.query(MotoristaEmpresa).filter(MotoristaEmpresa.id_motorista_empresa == motorista_id).first()
     if db_motorista is None:
         raise HTTPException(status_code=404, detail="Motorista não encontrado")
-    for var, value in vars(motorista).items():
-        setattr(db_motorista, var, value) if value else None
+    for campo, valor in motorista.dict(exclude_unset=True).items():
+        setattr(db_motorista, campo, valor)
     db.commit()
     db.refresh(db_motorista)
     return db_motorista

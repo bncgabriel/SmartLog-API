@@ -13,5 +13,8 @@ class VeiculoEmpresaRead(VeiculoEmpresaBase):
     class Config:
         orm_mode = True
 
-class VeiculoEmpresaUpdate(VeiculoEmpresaBase):
-    pass
+class VeiculoEmpresaUpdate(BaseModel):
+    placa_cavalo: str | None = None
+    placa_carreta: str | None = None
+    id_motorista_vinculado: int | None = None
+    id_empresa: int | None = None

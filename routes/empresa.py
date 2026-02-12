@@ -32,8 +32,8 @@ def atualizar_empresa (empresa_id: int, empresa: EmpresaUpdate, db: Session = De
     db_empresa = db.query(Empresa).filter(Empresa.id_empresa == empresa_id).first()
     if db_empresa is None:
         raise HTTPException(status_code=404, detail="Empresa not found")
-    for var, value in vars(empresa).items():
-        setattr(db_empresa, var, value) if value else None
+    for campo, valor in empresa.dict(exclude_unset=True).items():
+        setattr(db_empresa, campo, valor)
     db.commit()
     db.refresh(db_empresa)
     return db_empresa

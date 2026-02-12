@@ -19,5 +19,12 @@ class EmpresaRead(EmpresaBase):
     class Config:
         orm_mode = True
 
-class EmpresaUpdate(EmpresaBase):
-    pass
+class EmpresaUpdate(BaseModel):
+    razao_social: str | None = None
+    nome_fantasia: str | None = None
+    cnpj: str | None = None
+    endereco: str | None = None
+    ie: str | None = None
+    telefone: str | None = None
+    email: str | None = None
+    descricao: str | None = None
